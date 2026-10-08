@@ -18,8 +18,8 @@ DB = dict(
     password=os.getenv("DB_PASSWORD", "postgres"),
 )
 # The orders service asks the other services for the real prices
-MEALS_URL = os.getenv("MEALS_URL", "http://meals/meals/api")
-BEVERAGES_URL = os.getenv("BEVERAGES_URL", "http://beverages/beverages/api")
+MEALS_URL = os.getenv("MEALS_URL", "http://meals:5000/meals/api")
+BEVERAGES_URL = os.getenv("BEVERAGES_URL", "http://beverages:5000/beverages/api")
 
 PAGE = """<!doctype html>
 <html lang="en">
