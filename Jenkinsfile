@@ -23,7 +23,7 @@ pipeline {
                   docker build \
                     -t ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG} \
                     -t ${DOCKER_USER}/restaurant-$SVC:latest \
-                    -f $SVC/Dockerfile $SVC
+                    -f $SVC/Dockerfile $SVC/.
                 done
                 '''
             }
