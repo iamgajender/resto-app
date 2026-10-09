@@ -15,6 +15,22 @@ pipeline {
             }
         }
 
+     
+	
+	stage("agent env check"){
+	steps {
+	
+	sh '''
+    echo "===== Jenkins execution environment ====="
+    hostname
+    whoami
+    id
+    ls -l /var/run/docker.sock
+    docker context show
+    docker info
+'''
+}}
+
         stage('Build Images') {
             steps {
                 sh '''
