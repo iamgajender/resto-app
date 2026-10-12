@@ -1,3 +1,4 @@
+```groovy
 pipeline {
 
     agent any
@@ -15,32 +16,45 @@ pipeline {
             }
         }
 
-     
-	
-	stage("agent env check"){
-	steps {
-	
-	sh '''
-    echo "===== Jenkins execution environment ====="
-    hostname
-    whoami
-    id
-    ls -l /var/run/docker.sock
-    docker context show
-    docker info
-'''
-}}
+        stage('agent env check') {
+            steps {
+                sh '''
+                    echo "===== Jenkins execution environment ====="
+                    hostname
+                    whoami
+                    id
+                    ls -l /var/run/docker.sock
+                    docker context show
+                    docker info
+                '''
+            }
+        }
+
+        stage('Test SSH Connection') {
+            steps {
+                sshagent(credentials: ['ke_cred']) {
+                    sh '''
+                        set -e
+                        ssh -o StrictHostKeyChecking=accept-new \
+                            -o ConnectTimeout=10 \
+                            root@10.1.1.216 \
+                            "hostname && whoami"
+                    '''
+                }
+            }
+        }
 
         stage('Build Images') {
             steps {
                 sh '''
-                for SVC in home meals beverages orders; do
-                  echo "===== Building $SVC ====="
-                  docker build \
-                    -t ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG} \
-                    -t ${DOCKER_USER}/restaurant-$SVC:latest \
-                    -f $SVC/Dockerfile $SVC/.
-                done
+                    set -e
+                    for SVC in home meals beverages orders; do
+                        echo "===== Building $SVC ====="
+                        docker build \
+                            -t ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG} \
+                            -t ${DOCKER_USER}/restaurant-$SVC:latest \
+                            -f $SVC/Dockerfile $SVC/.
+                    done
                 '''
             }
         }
@@ -55,9 +69,9 @@ pipeline {
                     )
                 ]) {
                     sh '''
-                    echo "$DOCKER_PASSWORD" | docker login \
-                    -u "$DOCKER_USERNAME" \
-                    --password-stdin
+                        echo "$DOCKER_PASSWORD" | docker login \
+                            -u "$DOCKER_USERNAME" \
+                            --password-stdin
                     '''
                 }
             }
@@ -66,11 +80,12 @@ pipeline {
         stage('Push Images') {
             steps {
                 sh '''
-                for SVC in home meals beverages orders; do
-                  echo "===== Pushing $SVC ====="
-                  docker push ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG}
-                  docker push ${DOCKER_USER}/restaurant-$SVC:latest
-                done
+                    set -e
+                    for SVC in home meals beverages orders; do
+                        echo "===== Pushing $SVC ====="
+                        docker push ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG}
+                        docker push ${DOCKER_USER}/restaurant-$SVC:latest
+                    done
                 '''
             }
         }
@@ -88,9 +103,10 @@ pipeline {
 
         always {
             sh '''
-            docker logout || true
-            docker image prune -f || true
+                docker logout || true
+                docker image prune -f || true
             '''
         }
     }
 }
+```
