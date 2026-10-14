@@ -36,7 +36,7 @@ pipeline {
                         set -e
                         ssh -o StrictHostKeyChecking=accept-new \
                             -o ConnectTimeout=10 \
-                            Jenkins@10.1.1.216 \
+                            root@10.1.1.216 \
                             "hostname && whoami"
                     '''
                 }
