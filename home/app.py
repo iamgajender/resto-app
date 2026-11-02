@@ -75,7 +75,7 @@ PAGE = """<!doctype html>
   .head h2 { margin:0 0 8px; font-size:clamp(28px,4vw,40px); letter-spacing:-.8px; }
   .head p { margin:0; color:var(--muted); }
 
-  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:22px; }
   .card { position:relative; display:flex; flex-direction:column; gap:10px; padding:28px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow); transition:transform .2s, border-color .2s; overflow:hidden; }
   .card:hover, .card:focus-visible { transform:translateY(-6px); border-color:var(--gold); }
   .card .ico { display:grid; place-items:center; width:64px; height:64px; border-radius:18px; font-size:34px; background:var(--gold-soft); }
@@ -106,7 +106,7 @@ PAGE = """<!doctype html>
     .hero-grid { grid-template-columns:1fr; text-align:center; }
     .lead { margin-inline:auto; } .cta, .stats { justify-content:center; }
     .plate { margin:10px auto 0; max-width:340px; }
-    .cards { grid-template-columns:1fr; } .steps { grid-template-columns:1fr 1fr; }
+    .steps { grid-template-columns:1fr 1fr; }
   }
   @media (max-width:720px) {
     .burger { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; border:1px solid var(--line); background:var(--surface); cursor:pointer; font-size:20px; }
@@ -129,6 +129,7 @@ PAGE = """<!doctype html>
       <a class="link" href="/meals">Meals</a>
       <a class="link" href="/beverages">Beverages</a>
       <a class="link" href="/orders">My Orders</a>
+      <a class="link" href="/kitchen">Kitchen</a>
       <a class="btn btn-red" href="/meals">Order now</a>
     </nav>
   </div>
@@ -187,6 +188,13 @@ PAGE = """<!doctype html>
           <p>Every order is stored safely. Check your past orders and totals in one place.</p>
           <span class="go">View orders <i>&rarr;</i></span>
         </a>
+        <a class="card" href="/kitchen">
+          <span class="tag">Staff</span>
+          <span class="ico">&#127859;</span>
+          <h3>Kitchen</h3>
+          <p>See new orders as they arrive, set the preparation time and follow the countdown.</p>
+          <span class="go">Open kitchen <i>&rarr;</i></span>
+        </a>
       </div>
     </div>
   </section>
@@ -222,7 +230,7 @@ PAGE = """<!doctype html>
 <footer>
   <div class="wrap">
     <span>&copy; Quick Bites. Served fresh, built as microservices.</span>
-    <span><a href="/meals">Meals</a> &middot; <a href="/beverages">Beverages</a> &middot; <a href="/orders">Orders</a></span>
+    <span><a href="/meals">Meals</a> &middot; <a href="/beverages">Beverages</a> &middot; <a href="/orders">Orders</a> &middot; <a href="/kitchen">Kitchen</a></span>
   </div>
 </footer>
 

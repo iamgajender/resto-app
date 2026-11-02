@@ -1,7 +1,10 @@
 import json
 import os
+import threading
 import urllib.request
+import uuid
 from contextlib import closing
+from datetime import datetime, timezone
 
 import psycopg2
 from psycopg2.extras import Json
@@ -20,6 +23,8 @@ DB = dict(
 # The orders service asks the other services for the real prices
 MEALS_URL = os.getenv("MEALS_URL", "http://meals-service:5000/meals/api")
 BEVERAGES_URL = os.getenv("BEVERAGES_URL", "http://beverages-service:5000/beverages/api")
+KAFKA_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "192.168.1.213:9092,192.168.1.139:9092,192.168.1.133:9092")
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "orders")
 
 PAGE = """<!doctype html>
 <html lang="en">
@@ -297,6 +302,51 @@ def fetch_menu():
     return menu
 
 
+_producer = None
+_producer_lock = threading.Lock()
+
+
+def get_producer():
+    """Created on first use, so the orders service still starts when Kafka is down."""
+    global _producer
+    with _producer_lock:
+        if _producer is None:
+            from kafka import KafkaProducer
+            _producer = KafkaProducer(
+                bootstrap_servers=[s.strip() for s in KAFKA_SERVERS.split(",")],
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+                key_serializer=lambda k: str(k).encode("utf-8"),
+                acks="all",
+                retries=5,
+                bootstrap_timeout_ms=5000,
+                max_block_ms=5000,
+            )
+        return _producer
+
+
+def publish_order_event(order_id, customer_name, items, total):
+    """Tell the other services (kitchen, ...) that an order was placed."""
+    global _producer
+    event = {
+        "event_id": str(uuid.uuid4()),
+        "event_type": "ORDER_PLACED",
+        "order_id": order_id,
+        "customer_name": customer_name,
+        "items": items,
+        "total": float(total),
+        "status": "PLACED",
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        meta = get_producer().send(KAFKA_TOPIC, key=order_id, value=event).get(timeout=10)
+    except Exception:
+        with _producer_lock:
+            _producer = None             # build a fresh producer for the next order
+        raise
+    app.logger.info("Order event published: topic=%s partition=%s offset=%s",
+                    meta.topic, meta.partition, meta.offset)
+
+
 @app.route("/orders", strict_slashes=False)
 def page():
     return PAGE
@@ -336,7 +386,14 @@ def create_order():
         )
     except psycopg2.Error:
         return jsonify(error="Could not save the order. Database not reachable."), 503
-    return jsonify(order_id=row[0], total=total, status="PLACED"), 201
+    order_id = row[0]
+    try:
+        publish_order_event(order_id, name, lines, total)
+        kafka_status = "PUBLISHED"
+    except Exception:
+        app.logger.exception("Order %s was saved but its Kafka event was NOT published", order_id)
+        kafka_status = "PENDING"
+    return jsonify(order_id=order_id, total=total, status="PLACED", kafka_status=kafka_status), 201
 
 
 @app.route("/orders/api", methods=["GET"])

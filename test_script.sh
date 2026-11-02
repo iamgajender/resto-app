@@ -1,10 +1,10 @@
 #/bin/bash
 
 
-m_s_list=("home" "meals" "beverages" "orders")
+m_s_list=("home" "meals" "beverages" "orders" "kitchen")
 
 db=$DB_NAME
-latest_tag=18
+latest_tag="latest"
 echo "this is the our working db: $db"
 
 
