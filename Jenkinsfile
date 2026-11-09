@@ -29,25 +29,12 @@ pipeline {
             }
         }
 
-        stage('Test SSH Connection') {
-            steps {
-                sshagent(credentials: ['ke_cred']) {
-                    sh '''
-                        set -e
-                        ssh -o StrictHostKeyChecking=accept-new \
-                            -o ConnectTimeout=10 \
-                            root@10.1.1.216 \
-                            "hostname && whoami"
-                    '''
-                }
-            }
-        }
 
         stage('Build Images') {
             steps {
                 sh '''
                     set -e
-                    for SVC in home meals beverages orders; do
+                    for SVC in home meals beverages orders kitchen; do
                         echo "===== Building $SVC ====="
                         docker build \
                             -t ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG} \
@@ -62,7 +49,7 @@ pipeline {
             steps {
                 withCredentials([
                     usernamePassword(
-                        credentialsId: 'resto-creds',
+                        credentialsId: 'resto-app-token',
                         usernameVariable: 'DOCKER_USERNAME',
                         passwordVariable: 'DOCKER_PASSWORD'
                     )
@@ -80,7 +67,7 @@ pipeline {
             steps {
                 sh '''
                     set -e
-                    for SVC in home meals beverages orders; do
+                    for SVC in home meals beverages orders kitchen; do
                         echo "===== Pushing $SVC ====="
                         docker push ${DOCKER_USER}/restaurant-$SVC:${IMAGE_TAG}
                         docker push ${DOCKER_USER}/restaurant-$SVC:latest
