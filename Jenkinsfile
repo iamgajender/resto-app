@@ -202,7 +202,7 @@ docker run -d \
     --restart unless-stopped \
     --network "$DOCKER_NETWORK" \
     -p "${ORDERS_PORT}:5000" \
-    --env-file /etc/resto/orders.env \
+    --env-file /opt/resto_env/orders.env \
     "${DOCKER_USER}/orders:${IMAGE_TAG}"
 
 echo "===== Deploying KITCHEN ====="
@@ -212,6 +212,7 @@ docker run -d \
     --restart unless-stopped \
     --network "$DOCKER_NETWORK" \
     -p "${KITCHEN_PORT}:5000" \
+    --env-file /opt/resto_env/kitchen.env \
     "${DOCKER_USER}/kitchen:${IMAGE_TAG}"
 
 echo "===== Verifying Containers ====="
