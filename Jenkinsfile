@@ -15,7 +15,7 @@ pipeline {
         ORDERS_PORT = '5004'
         KITCHEN_PORT = '5005'
 
-        DEPLOY_HOST = '192.168.1.30'
+        DEPLOY_HOST = '192.168.1.62'
         DEPLOY_USER = 'root'
     }
 
