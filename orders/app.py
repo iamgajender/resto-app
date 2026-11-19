@@ -19,6 +19,7 @@ DB = dict(
     dbname=os.getenv("DB_NAME", "restaurant"),
     user=os.getenv("DB_USER", "postgres"),
     password=os.getenv("DB_PASSWORD", "postgres"),
+    sslmode="require"
 )
 # The orders service asks the other services for the real prices
 MEALS_URL = os.getenv("MEALS_URL", "http://meals-service:5000/meals/api")

@@ -20,6 +20,7 @@ DB = dict(
     dbname=os.getenv("DB_NAME", "restaurant"),
     user=os.getenv("DB_USER", "postgres"),
     password=os.getenv("DB_PASSWORD", "postgres"),
+    sslmode="require"
 )
 KAFKA_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "192.168.1.213:9092,192.168.1.139:9092,192.168.1.133:9092")
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "orders")
